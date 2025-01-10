@@ -1,0 +1,39 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+body {
+  font-size: clamp(20px, 6vw, 7rem);
+  font-family: "Poppins", serif;
+  font-weight: 100;
+  font-style: normal;
+}
+
+
+#chatbutton::before {
+  position: absolute;
+  content: "NOW";
+  width: 0%;
+  top: 0;
+  left: -20%;
+  bottom: 0;
+  border-radius: 9999999px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  
+  background-color: rgb(67,56,202);
+  transition: all 0.3s ; /* Smooth transition */
+}
+
+#chatbutton:hover::before {
+  width: 100%;
+  left: 0;
+ 
+}
+

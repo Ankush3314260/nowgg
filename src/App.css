@@ -1,0 +1,34 @@
+.slider {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  background-color: #ccc;
+}
+.switch input {
+  display: none;
+}
+
+.slider:before {
+  content: "";
+  position: absolute;
+  width: 40%;
+  transition: all 0.3s;
+  border-radius: 50%;
+  background-color: white;
+  left: 5%;
+  bottom: 7%;
+  top: 8%;
+}
+
+.input1:checked + .slider {
+  background-color: rgb(255, 100, 247);
+}
+.input2:checked + .slider {
+  background-color: rgb(100, 180, 255);
+}
+
+input:checked + .slider:before {
+  transform: translateX(125%);
+}
