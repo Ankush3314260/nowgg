@@ -4,9 +4,9 @@ Steps to run project locally
 
  ![Blue Badge](step 1 : open any code editor and interminal run this command = git clone https://github.com/Ankush3314260/nowgg.git )
 
- ![Blue Badge](step 2 :  run this command  npm i or npm install )
+ ![Blue Badge]()step 2 :  run this command  npm i or npm install 
 
- ![Blue Badge](step 3 :  run this command  npm run dev )
+ ![Blue Badge]()step 3 :  run this command  npm run dev 
 
  You are good to go
 
