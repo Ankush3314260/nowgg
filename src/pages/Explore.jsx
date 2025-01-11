@@ -4,18 +4,20 @@ import Loader from "../components/Loader";
 import Popup from "../components/Popup";
 import { PersonIdContext } from "../contexts/Personcontext";
 import SearchBar from "../components/SearchBar";
-import { Link } from "react-router";
+import CardComponent from "../components/CardComponent";
 const Explore = () => {
   const [photos, setPhotos] = useState([]);
   const [male, setMale] = useState(false);
   const [female, setFemale] = useState(false);
   const [maleData, setMaledata] = useState([]);
   const [femaleData, setFemaledata] = useState([]);
+  const [searchTerm, setSearchterm] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [countPage, setCountpage] = useState(2);
-  const { setPersonid } = useContext(PersonIdContext);
+  const [countPage, setCountpage] = useState(1);
+  const { searchText } = useContext(PersonIdContext);
 
   const getData = async () => {
+    setLoading(true);
     try {
       const { data } = await axios.get(
         `https://api.themoviedb.org/3/person/popular?language=en-US&page=${countPage}&api_key=${
@@ -28,14 +30,10 @@ const Explore = () => {
       console.log(error);
     }
   };
-  const handlePopUp = (id) => {
-    setPersonid(id);
-    document.querySelector("body").style.overflow = "hidden";
-    document.querySelector("#popupcontainer").classList.toggle("hidden");
-  };
+
   const handleScroll = () => {
     if (
-      window.innerHeight + document.documentElement.scrollTop + 10 >=
+      window.innerHeight + document.documentElement.scrollTop + 300 >=
       document.documentElement.scrollHeight
     ) {
       setLoading(true);
@@ -50,29 +48,77 @@ const Explore = () => {
     };
   }, []);
   useEffect(() => {
-    getData();
+    if (searchTerm.length == 0) {
+      getData();
+    }
   }, [countPage]);
   useEffect(() => {
     if (male == true) {
+      setLoading(true);
       let temp = photos.filter((items) => {
         if (items.gender == 2) {
           return items;
         }
       });
       setMaledata(temp);
+      setLoading(false);
       // console.log(temp);
     }
 
     if (female == true) {
+      setLoading(true);
       let temp = photos.filter((items) => {
         if (items.gender == 1) {
           return items;
         }
       });
       setFemaledata(temp);
+      setLoading(false);
       // console.log(temp);
     }
   }, [male, female, countPage]);
+  useEffect(() => {
+    if (searchText.length != 0) {
+      setLoading(true);
+      if (
+        (male == false && female == false) ||
+        (male == true && female == true)
+      ) {
+        // console.log(searchText);
+        let flag = photos.filter((items) => {
+          // console.log(items);
+          if (items.name.toLowerCase().includes(searchText.toLowerCase())) {
+            return items;
+          }
+        });
+        setSearchterm(flag);
+
+        setLoading(false);
+      }
+      if (male == true && female == false) {
+        let flag = maleData.filter((items) => {
+          // console.log(items);
+          if (items.name.toLowerCase().includes(searchText.toLowerCase())) {
+            return items;
+          }
+        });
+        setSearchterm(flag);
+        setLoading(false);
+      }
+      if (female == true && male == false) {
+        let flag = femaleData.filter((items) => {
+          // console.log(items);
+          if (items.name.toLowerCase().includes(searchText.toLowerCase())) {
+            return items;
+          }
+        });
+        setSearchterm(flag);
+        setLoading(false);
+      }
+    } else {
+      setSearchterm([]);
+    }
+  }, [searchText]);
   return (
     <div>
       <h1 className="text-center">WELCOME, to now.gg</h1>
@@ -141,172 +187,54 @@ const Explore = () => {
         <Popup />
       </div>
       <div className="">
-        {photos.length != 0 &&
-        ((male == false && female == false) ||
-          (male == true && female == true)) ? (
-          <div className="grid grid-cols-5 max-lg:grid-cols-4 max-sm:grid-cols-3 max-xs:grid-cols-2  max-sm:gap-[0.5%] text-[0.25em]">
-            {photos.map((photo, index) => {
-              return (
-                <div key={index}>
-                  <Link to={`/details/${photo.name}&acting=${photo.id}`}>
-                    <div className=" w-[90%]  border-2 border-white hover:border-indigo-700 transition-all duration-1000 p-2 rounded-xl cursor-pointer mt-[0.2em]">
-                      <img
-                        className="w-4/5 rounded-xl m-auto"
-                        src={`https://image.tmdb.org/t/p/w500/${photo.profile_path}`}
-                        alt={`${photo.title}`}
-                      />
-                      <button
-                        id="chatbutton"
-                        onClick={(e) => {
-                          e.preventDefault();
-                          handlePopUp(photo.id);
-                        }}
-                        className="bg-indigo-700 relative overflow-hidden text-white  transition-all duration-200 font-[600] flex items-center justify-center space-x-1 px-[0.5em] py-[0.3em] rounded-full   -translate-y-1/2 m-auto w-3/5"
-                      >
-                        {" "}
-                        <span className="w-[30%] ">
-                          <svg
-                            xmlns="http://www.w3.org/2000/svg"
-                            version="1.1"
-                            viewBox="-5.0 -10.0 110.0 135.0"
-                          >
-                            <path
-                              fill="#FFFFFF"
-                              d="m64.805 4.9688c-0.082032-0.48047-0.77734-0.48047-0.85938 0-0.63281 3.6289-3.4727 6.4688-7.1016 7.1016-0.48047 0.082032-0.48047 0.77734 0 0.85938 3.6289 0.63281 6.4688 3.4727 7.1016 7.1016 0.082032 0.48047 0.77734 0.48047 0.85938 0 0.63281-3.6289 3.4727-6.4688 7.1016-7.1016 0.48047-0.082032 0.48047-0.77734 0-0.85938-3.6289-0.63281-6.4688-3.4727-7.1016-7.1016zm17.566 9.3516c0.14844-0.84375 1.3594-0.84375 1.5078 0 1.1055 6.3477 6.0781 11.32 12.426 12.426 0.84375 0.14844 0.84375 1.3594 0 1.5078-6.3477 1.1055-11.32 6.0781-12.426 12.426-0.14844 0.84375-1.3594 0.84375-1.5078 0-1.1055-6.3477-6.0781-11.32-12.426-12.426-0.84375-0.14844-0.84375-1.3594 0-1.5078 6.3477-1.1055 11.32-6.0781 12.426-12.426zm-28.621 13.18c0-1.0352-0.83984-1.875-1.875-1.875h-32.5c-5.1758 0-9.375 4.1992-9.375 9.375v31.25c0 5.1758 4.1992 9.375 9.375 9.375h27.5c1.7266 0 3.125 1.3984 3.125 3.125v6.875c0 3.6055 4.1172 5.6641 7 3.5l15.832-11.875c1.4062-1.0547 3.1172-1.625 4.875-1.625h6.668c5.1758 0 9.375-4.1992 9.375-9.375v-11.25c0-1.0352-0.83984-1.875-1.875-1.875s-1.875 0.83984-1.875 1.875v11.25c0 3.1055-2.5195 5.625-5.625 5.625h-6.668c-2.5664 0-5.0664 0.83203-7.125 2.375l-15.832 11.875c-0.41016 0.30859-1 0.015625-1-0.5v-6.875c0-3.7969-3.0781-6.875-6.875-6.875h-27.5c-3.1055 0-5.625-2.5195-5.625-5.625v-31.25c0-3.1055 2.5195-5.625 5.625-5.625h32.5c1.0352 0 1.875-0.83984 1.875-1.875z"
-                              fillRule="evenodd"
-                            />
-                          </svg>
-                        </span>
-                        <span className="w-2/5 text-[0.85em] max-sm:text-[1.2em] ">
-                          Chat
-                        </span>
-                      </button>
-                      <div className="-translate-y-[20%] max-xs:-translate-y-[10%] mx-[5%] max-sm:text-[1.5em] max-xs:text-[1.8em]">
-                        <h1 className="font-[500] text-indigo-950  ">
-                          {photo.name}
-                        </h1>
-                        <p className="font-[300] text-[0.7em]  ">
-                          {photo.known_for[0].overview.substring(0, 60)}...
-                        </p>
-                      </div>
-                    </div>
-                  </Link>
+        <div>
+          {searchTerm.length != 0 ? (
+            <div className="grid grid-cols-4  max-sm:grid-cols-2  max-sm:gap-[0.5%] text-[0.25em]">
+              {searchTerm.map((photo, index) => {
+                return <CardComponent key={index} photo={photo} />;
+              })}
+            </div>
+          ) : (
+            <div>
+              {searchText.length != 0 ? (
+                <div className="min-h-screen w-4/5 text-[0.5em] text-center font-[400] m-auto">
+                  NO Data to Dislay For Search &apos;{searchText}&apos;
                 </div>
-              );
-            })}
-            {loading && <Loader />}
-          </div>
-        ) : (
-          <div>
-            {male == true && female == false ? (
-              <div className="grid grid-cols-5 max-lg:grid-cols-4 max-sm:grid-cols-3 max-xs:grid-cols-2  max-sm:gap-[0.5%] text-[0.25em] mt-[0.3em]">
-                {maleData.map((photo, index) => {
-                  return (
-                    <div key={index}>
-                      <Link to={`/details/${photo.name}&acting=${photo.id}`}>
-                        <div className=" w-[90%]  border-2 border-white hover:border-indigo-700 transition-all duration-1000 p-2 rounded-xl cursor-pointer mt-[0.2em]">
-                          <img
-                            className="w-4/5 rounded-xl m-auto"
-                            src={`https://image.tmdb.org/t/p/w500/${photo.profile_path}`}
-                            alt={`${photo.title}`}
-                          />
-                          <button
-                            id="chatbutton"
-                            onClick={(e) => {
-                              e.preventDefault()
-                              handlePopUp(photo.id);
-                            }}
-                            className="bg-indigo-700 relative overflow-hidden text-white  transition-all duration-200 font-[600] flex items-center justify-center space-x-1 px-[0.5em] py-[0.3em] rounded-full   -translate-y-1/2 m-auto w-3/5"
-                          >
-                            {" "}
-                            <span className="w-[30%] ">
-                              <svg
-                                xmlns="http://www.w3.org/2000/svg"
-                                version="1.1"
-                                viewBox="-5.0 -10.0 110.0 135.0"
-                              >
-                                <path
-                                  fill="#FFFFFF"
-                                  d="m64.805 4.9688c-0.082032-0.48047-0.77734-0.48047-0.85938 0-0.63281 3.6289-3.4727 6.4688-7.1016 7.1016-0.48047 0.082032-0.48047 0.77734 0 0.85938 3.6289 0.63281 6.4688 3.4727 7.1016 7.1016 0.082032 0.48047 0.77734 0.48047 0.85938 0 0.63281-3.6289 3.4727-6.4688 7.1016-7.1016 0.48047-0.082032 0.48047-0.77734 0-0.85938-3.6289-0.63281-6.4688-3.4727-7.1016-7.1016zm17.566 9.3516c0.14844-0.84375 1.3594-0.84375 1.5078 0 1.1055 6.3477 6.0781 11.32 12.426 12.426 0.84375 0.14844 0.84375 1.3594 0 1.5078-6.3477 1.1055-11.32 6.0781-12.426 12.426-0.14844 0.84375-1.3594 0.84375-1.5078 0-1.1055-6.3477-6.0781-11.32-12.426-12.426-0.84375-0.14844-0.84375-1.3594 0-1.5078 6.3477-1.1055 11.32-6.0781 12.426-12.426zm-28.621 13.18c0-1.0352-0.83984-1.875-1.875-1.875h-32.5c-5.1758 0-9.375 4.1992-9.375 9.375v31.25c0 5.1758 4.1992 9.375 9.375 9.375h27.5c1.7266 0 3.125 1.3984 3.125 3.125v6.875c0 3.6055 4.1172 5.6641 7 3.5l15.832-11.875c1.4062-1.0547 3.1172-1.625 4.875-1.625h6.668c5.1758 0 9.375-4.1992 9.375-9.375v-11.25c0-1.0352-0.83984-1.875-1.875-1.875s-1.875 0.83984-1.875 1.875v11.25c0 3.1055-2.5195 5.625-5.625 5.625h-6.668c-2.5664 0-5.0664 0.83203-7.125 2.375l-15.832 11.875c-0.41016 0.30859-1 0.015625-1-0.5v-6.875c0-3.7969-3.0781-6.875-6.875-6.875h-27.5c-3.1055 0-5.625-2.5195-5.625-5.625v-31.25c0-3.1055 2.5195-5.625 5.625-5.625h32.5c1.0352 0 1.875-0.83984 1.875-1.875z"
-                                  fillRule="evenodd"
-                                />
-                              </svg>
-                            </span>
-                            <span className="w-2/5 text-[0.85em] max-sm:text-[1.2em] ">
-                              Chat
-                            </span>
-                          </button>
-                          <div className="-translate-y-[20%] max-xs:-translate-y-[10%] mx-[5%] max-sm:text-[1.5em] max-xs:text-[1.8em]">
-                            <h1 className="font-[500] text-indigo-950  ">
-                              {photo.name}
-                            </h1>
-                            <p className="font-[300] text-[0.7em]  ">
-                              {photo.known_for[0].overview.substring(0, 60)}...
-                            </p>
-                          </div>
-                        </div>
-                      </Link>
+              ) : (
+                <div>
+                  {photos.length != 0 &&
+                  ((male == false && female == false) ||
+                    (male == true && female == true)) ? (
+                    <div className="grid grid-cols-4  max-sm:grid-cols-2  max-sm:gap-[1%] max-xs:gap-0 text-[0.25em]">
+                      {photos.map((photo, index) => {
+                        return <CardComponent key={index} photo={photo} />;
+                      })}
+                      {loading && <Loader />}
                     </div>
-                  );
-                })}
-                {loading && <Loader />}
-              </div>
-            ) : (
-              <div className="grid grid-cols-5 max-lg:grid-cols-4 max-sm:grid-cols-3 max-xs:grid-cols-2  max-sm:gap-[0.5%] text-[0.25em] mt-[0.3em]">
-                {femaleData.map((photo, index) => {
-                  return (
-                    <div key={index}>
-                      <Link to={`/details/${photo.name}&acting=${photo.id}`}>
-                        <div className=" w-[90%]  border-2 border-white hover:border-indigo-700 transition-all duration-1000 p-2 rounded-xl cursor-pointer mt-[0.2em]">
-                          <img
-                            className="w-4/5 rounded-xl m-auto"
-                            src={`https://image.tmdb.org/t/p/w500/${photo.profile_path}`}
-                            alt={`${photo.title}`}
-                          />
-                          <button
-                            id="chatbutton"
-                            onClick={(e) => {
-                              e.preventDefault()
-                              handlePopUp(photo.id);
-                            }}
-                            className="bg-indigo-700 relative overflow-hidden text-white  transition-all duration-200 font-[600] flex items-center justify-center space-x-1 px-[0.5em] py-[0.3em] rounded-full   -translate-y-1/2 m-auto w-3/5"
-                          >
-                            {" "}
-                            <span className="w-[30%] ">
-                              <svg
-                                xmlns="http://www.w3.org/2000/svg"
-                                version="1.1"
-                                viewBox="-5.0 -10.0 110.0 135.0"
-                              >
-                                <path
-                                  fill="#FFFFFF"
-                                  d="m64.805 4.9688c-0.082032-0.48047-0.77734-0.48047-0.85938 0-0.63281 3.6289-3.4727 6.4688-7.1016 7.1016-0.48047 0.082032-0.48047 0.77734 0 0.85938 3.6289 0.63281 6.4688 3.4727 7.1016 7.1016 0.082032 0.48047 0.77734 0.48047 0.85938 0 0.63281-3.6289 3.4727-6.4688 7.1016-7.1016 0.48047-0.082032 0.48047-0.77734 0-0.85938-3.6289-0.63281-6.4688-3.4727-7.1016-7.1016zm17.566 9.3516c0.14844-0.84375 1.3594-0.84375 1.5078 0 1.1055 6.3477 6.0781 11.32 12.426 12.426 0.84375 0.14844 0.84375 1.3594 0 1.5078-6.3477 1.1055-11.32 6.0781-12.426 12.426-0.14844 0.84375-1.3594 0.84375-1.5078 0-1.1055-6.3477-6.0781-11.32-12.426-12.426-0.84375-0.14844-0.84375-1.3594 0-1.5078 6.3477-1.1055 11.32-6.0781 12.426-12.426zm-28.621 13.18c0-1.0352-0.83984-1.875-1.875-1.875h-32.5c-5.1758 0-9.375 4.1992-9.375 9.375v31.25c0 5.1758 4.1992 9.375 9.375 9.375h27.5c1.7266 0 3.125 1.3984 3.125 3.125v6.875c0 3.6055 4.1172 5.6641 7 3.5l15.832-11.875c1.4062-1.0547 3.1172-1.625 4.875-1.625h6.668c5.1758 0 9.375-4.1992 9.375-9.375v-11.25c0-1.0352-0.83984-1.875-1.875-1.875s-1.875 0.83984-1.875 1.875v11.25c0 3.1055-2.5195 5.625-5.625 5.625h-6.668c-2.5664 0-5.0664 0.83203-7.125 2.375l-15.832 11.875c-0.41016 0.30859-1 0.015625-1-0.5v-6.875c0-3.7969-3.0781-6.875-6.875-6.875h-27.5c-3.1055 0-5.625-2.5195-5.625-5.625v-31.25c0-3.1055 2.5195-5.625 5.625-5.625h32.5c1.0352 0 1.875-0.83984 1.875-1.875z"
-                                  fillRule="evenodd"
-                                />
-                              </svg>
-                            </span>
-                            <span className="w-2/5 text-[0.85em] max-sm:text-[1.2em] ">
-                              Chat
-                            </span>
-                          </button>
-                          <div className="-translate-y-[20%] max-xs:-translate-y-[10%] mx-[5%] max-sm:text-[1.5em] max-xs:text-[1.8em]">
-                            <h1 className="font-[500] text-indigo-950  ">
-                              {photo.name}
-                            </h1>
-                            <p className="font-[300] text-[0.7em]  ">
-                              {photo.known_for[0].overview.substring(0, 60)}...
-                            </p>
-                          </div>
+                  ) : (
+                    <div>
+                      {male == true && female == false ? (
+                        <div className="grid grid-cols-4  max-sm:grid-cols-2  max-sm:gap-[0.5%] text-[0.25em] mt-[0.3em]">
+                          {maleData.map((photo, index) => {
+                            return <CardComponent key={index} photo={photo} />;
+                          })}
+                          {loading && <Loader />}
                         </div>
-                      </Link>
+                      ) : (
+                        <div className="grid grid-cols-4  max-sm:grid-cols-2  max-sm:gap-[0.5%] text-[0.25em] mt-[0.3em]">
+                          {femaleData.map((photo, index) => {
+                            return <CardComponent key={index} photo={photo} />;
+                          })}
+                          {loading && <Loader />}
+                        </div>
+                      )}
                     </div>
-                  );
-                })}
-                {loading && <Loader />}
-              </div>
-            )}
-          </div>
-        )}
+                  )}
+                </div>
+              )}
+            </div>
+          )}
+        </div>
       </div>
     </div>
   );

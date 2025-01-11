@@ -37,7 +37,7 @@ const Popup = () => {
     <div className="  relative h-svh flex items-center justify-center">
       <button onClick={handleClose}>
         <svg
-          className="w-[5%] min-w-[20px] absolute top-[2%] right-[2%] hover:rotate-180 transition-all duration-200 "
+          className="w-[5%] min-w-[20px] absolute top-[2%] max-sm:top-[5%] right-[2%] hover:rotate-180 transition-all duration-200 "
           xmlns="http://www.w3.org/2000/svg"
           viewBox="0 -960 960 960"
           fill="#000000"
@@ -45,13 +45,13 @@ const Popup = () => {
           <path d="m256-200-56-56 224-224-224-224 56-56 224 224 224-224 56 56-224 224 224 224-56 56-224-224-224 224Z" />
         </svg>
       </button>
-      <div className="w-4/5 max-sm:w-[90%] max-xs:w-[98%] h-[90vh]  flex items-center m-auto  ">
+      <div className="w-4/5 max-sm:w-[100%]  h-[90vh]  sm:flex sm:items-center m-auto  ">
         {loading && <Loader />}
         {!loading && (
-          <div className="flex justify-between max-xs:flex-wrap bg-white ">
+          <div className="flex justify-between max-sm:flex-wrap bg-white max-sm:min-h-[90vh]">
 
             <img
-              className="w-1/5 min-w-[100px] max-xs:m-auto max-xs:rounded-sm  object-cover "
+              className="w-1/5  max-xs:min-w-[150px] max-sm:min-w-[100px] max-xs:m-auto max-xs:rounded-sm  object-cover "
               src={`https://image.tmdb.org/t/p/w500/${selectedPerson.profile_path}`}
               alt="person_Image"
             />
