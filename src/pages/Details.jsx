@@ -1,10 +1,11 @@
 import axios from "axios";
-import { useEffect, useState } from "react";
+import { useEffect, useState,useContext } from "react";
 import { useParams } from "react-router";
-
+import {PersonIdContext} from "../contexts/Personcontext";
 const Details = () => {
   const { Id } = useParams();
   const [personFulldetails, setPersonfulldetails] = useState({});
+  const {setSearchText} = useContext(PersonIdContext)
   const getDetails = async () => {
     let ID = Id.match(/(?<=acting=)\d+/)[0];
     try {
@@ -14,12 +15,14 @@ const Details = () => {
         }`
       );
       setPersonfulldetails(data);
+      
       //console.log(data);
     } catch (error) {
       console.log(error);
     }
   };
   useEffect(() => {
+    setSearchText('')
     getDetails();
   }, []);
  
